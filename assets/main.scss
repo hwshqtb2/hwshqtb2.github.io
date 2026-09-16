@@ -1,0 +1,89 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@use "minima";
+
+.autotoc {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5em;
+  }
+
+  li {
+    margin: 0.2em 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: #2a7ae2;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.prevnext-root {
+  margin-bottom: 1rem;
+
+  a {
+    text-decoration: none;
+    color: #2a7ae2;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.prevnext {
+  margin: 2rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid #e8e8e8;
+
+  .prevnext-upper {
+    display: block;
+    text-align: center;
+    margin-bottom: 0.75rem;
+    text-decoration: none;
+    color: #2a7ae2;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .prevnext-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    a {
+      max-width: 48%;
+      text-decoration: none;
+      color: #2a7ae2;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .prevnext-next {
+      margin-left: auto;
+      text-align: right;
+    }
+  }
+}

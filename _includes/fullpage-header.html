@@ -1,0 +1,22 @@
+<header class="fullpage-header">
+    <h1 class="fullpage-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
+    <p class="fullpage-meta">
+        {% if page.date %}
+            <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+                创建于{{ page.date | date: site.date_format }}
+            </time>
+        {% endif %}
+        {% if page.modified_date %}
+            <time class="dt-modified" datetime="{{ page.modified-date | date_to_xmlschema }}" itemprop="dateModified">
+                最后编辑于{{ page.modified_date | date: site.date_format }}
+            </time>
+        {% endif %}
+        {% if page.author %}
+        <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card"
+                itemprop="name">{{ page.author }}</span></span>
+        {% endif %}
+    </p>
+    {% if page.excerpt %}
+    <h4>{{ page.excerpt }}</h4>
+    {% endif %}
+</header>

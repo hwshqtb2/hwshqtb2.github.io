@@ -1,0 +1,17 @@
+{% if page.prev or page.next or page.parent %}
+<nav class="prevnext" aria-label="上一篇/下一篇">
+  {% if page.parent %}
+  <a class="prevnext-upper" href="{{ page.parent.url | relative_url }}">☰ 返回上层目录</a>
+  {% endif %}
+  {% if page.prev or page.next %}
+  <div class="prevnext-row">
+    {% if page.prev %}
+    <a class="prevnext-prev" href="{{ page.prev.url | relative_url }}">← {{ page.prev.title }}</a>
+    {% endif %}
+    {% if page.next %}
+    <a class="prevnext-next" href="{{ page.next.url | relative_url }}">{{ page.next.title }} →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</nav>
+{% endif %}

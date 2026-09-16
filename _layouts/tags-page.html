@@ -1,0 +1,11 @@
+---
+layout: page
+---
+
+<article>
+    <ul class="article-list">
+        {% for post in page.tagged %}
+            <a href="{{post.url}}">{{ post.title }}</a><br>
+        {% endfor %}
+    </ul>
+</article>

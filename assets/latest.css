@@ -1,0 +1,44 @@
+.left-floating-content {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 220px;
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 100;
+}
+
+.fullpage-list-heading {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #3498db;
+}
+
+.test-text {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.test-item {
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 2px solid #3498db;
+}
+
+/* 响应式调整 */
+@media (max-width: 1024px) {
+.left-floating-content {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    margin-bottom: 20px;
+    max-width: 300px;
+    }
+}

@@ -1,0 +1,21 @@
+<head>
+    <style type="text/CSS">
+        div.tag-item {
+            flex-wrap: wrap;
+            background-color:rgba(127, 255, 255, 0.3);
+            color: rgb(64, 64, 191);
+            display: inline-block; 
+            border-radius: 4px;
+            margin: 4px;
+            font-weight:bolder;
+            border-style: outset;
+            border-color: rgba(127, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<div class="tags">
+    {% for tag in page.tags %}
+        <div class="tag-item"><a href="/tags/{{tag}}.html">{{tag}}</a></div>
+    {% endfor %}
+</div>

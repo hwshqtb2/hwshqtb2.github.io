@@ -1,1 +1,11 @@
-hello
+---
+layout: default
+---
+
+{% if site.data["main_part_page"] %}
+<div style="display: flex; flex-direction: column; align-items: center;">
+{% for page in site.data["main_part_page"] %}
+  <h2><a href="{{ page.url }}">{{ page.title }}</a></h2>
+{% endfor %}
+</div>
+{% endif %}

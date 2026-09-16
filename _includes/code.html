@@ -1,0 +1,222 @@
+{%- comment -%}
+C++ 在线编辑器组件（基于 Coliru 在线编译）
+
+用法：在任意页面中
+  1. 在 front matter 中声明初始代码（可选，省略时使用内置 Hello World 示例）：
+     ---
+     code: |
+       #include <stdio.h>
+       int main() { ... }
+     ---
+  2. 在正文中引入组件（每个页面只引入一次）：
+     {% include code.html %}
+
+组件提供语言（C/C++）、编译器（GCC/Clang）、语言标准（C99~C17、C++11~C++23）
+三个下拉选择，编译命令会按所选组合动态生成。
+{%- endcomment -%}
+
+{%- capture code_editor_default -%}
+#include <stdio.h>
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+{%- endcapture -%}
+{%- assign code_editor_src = page.code | default: code_editor_default -%}
+
+<div class="code-editor">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+    <div id="code-show-div">
+        <button id="code-edit" type="button" onclick="editFunction()">编辑</button>
+        <span>语言
+            <select id="show-lang" disabled>
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+            </select>
+        </span>
+        <span>编译器
+            <select id="show-compiler" disabled></select>
+        </span>
+        <span>标准
+            <select id="show-std" disabled></select>
+        </span>
+        这个编辑器使用了<a href="https://coliru.stacked-crooked.com">Coliru</a>
+        <pre><code id="example-code">{{ code_editor_src | escape }}</code></pre>
+        <p>运行结果</p>
+        <div>
+            <pre><code id="show-result"></code></pre>
+        </div>
+    </div>
+    <div id="code-edit-div" style="display: none;">
+        <button id="code-exit" type="button" onclick="exitFunction()">退出</button>
+        <button id="code-run" type="button" onclick="runFunction()">运行</button>
+        <span>语言
+            <select id="code-lang" onchange="onLangChange()">
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+            </select>
+        </span>
+        <span>编译器
+            <select id="code-compiler"></select>
+        </span>
+        <span>标准
+            <select id="code-std"></select>
+        </span>
+        这个编辑器使用了<a href="https://coliru.stacked-crooked.com">Coliru</a>
+        <pre contenteditable="plaintext-only"><code id="real-code">{{ code_editor_src | escape }}</code></pre>
+        <p>运行结果</p>
+        <div>
+            <pre><code id="code-result"></code></pre>
+        </div>
+    </div>
+
+    <script>
+        var CODE_API = "https://coliru.stacked-crooked.com/compile";
+
+        // 各语言可选的编译器与标准（"default" 表示不加 -std，用编译器默认标准）
+        var COMPILERS = {
+            cpp: [["g++", "GCC (g++)"], ["clang++", "Clang (clang++)"]],
+            c:   [["gcc", "GCC (gcc)"], ["clang", "Clang (clang)"]]
+        };
+        var STDS = {
+            cpp: ["default", "c++11", "c++14", "c++17", "c++20", "c++23"],
+            c:   ["default", "c99", "c11", "c17"]
+        };
+        var STD_DEFAULTS = { cpp: "c++17", c: "c11" };
+
+        function fillSelect(id, options) {
+            var sel = document.getElementById(id);
+            sel.innerHTML = "";
+            options.forEach(function (opt) {
+                var o = document.createElement("option");
+                if (Array.isArray(opt)) { o.value = opt[0]; o.textContent = opt[1]; }
+                else { o.value = opt; o.textContent = (opt === "default") ? "(编译器默认)" : opt; }
+                sel.appendChild(o);
+            });
+        }
+        function onLangChange() {
+            var lang = document.getElementById("code-lang").value;
+            fillSelect("code-compiler", COMPILERS[lang]);
+            fillSelect("code-std", STDS[lang]);
+            document.getElementById("code-std").value = STD_DEFAULTS[lang];
+            syncOptions();
+        }
+        // 把当前的语言/编译器/标准同步到展示区（只读显示，不允许编辑）
+        function syncOptions() {
+            var lang = document.getElementById("code-lang").value;
+            document.getElementById("show-lang").value = lang;
+            fillSelect("show-compiler", COMPILERS[lang]);
+            fillSelect("show-std", STDS[lang]);
+            document.getElementById("show-compiler").value = document.getElementById("code-compiler").value;
+            document.getElementById("show-std").value = document.getElementById("code-std").value;
+        }
+        // 根据当前选择生成编译命令。
+        // C 用 -x c 强制按 C 语言编译，与源文件扩展名无关；
+        // Coliru 把提交的 src 保存为文件并执行 cmd，命令与文档示例一致。
+        function buildCmd() {
+            var lang = document.getElementById("code-lang").value;
+            var comp = document.getElementById("code-compiler").value;
+            var std = document.getElementById("code-std").value;
+            var stdFlag = (std === "default") ? "" : " -std=" + std;
+            if (lang === "c") {
+                return comp + " -x c main.cpp" + stdFlag + " -o main && ./main";
+            }
+            return comp + " main.cpp" + stdFlag + " -o main && ./main";
+        }
+
+        function editFunction() {
+            document.getElementById("code-show-div").style.display = "none";
+            document.getElementById("code-edit-div").style.display = "block";
+            // 编辑区保持纯文本、不做实时高亮，避免 highlight.js 重建 DOM 导致光标丢失
+            // （结果框不清空：结果同时写入展示区和编辑区，切换视图时保留）
+            document.getElementById("real-code").focus();
+        }
+        // 把可编辑区内容转成纯文本：<br> 转成换行，文本节点原样保留
+        // （不同浏览器对回车键的处理不同：有的插入 \n 文本，有的插入 <br> 元素，
+        //  直接读 textContent 会把 <br> 丢掉，导致换行消失）
+        function editableText(el) {
+            var out = "";
+            (function walk(node) {
+                if (node.nodeType === 3) {          // 文本节点
+                    out += node.nodeValue;
+                } else if (node.nodeType === 1) {   // 元素节点
+                    if (node.tagName === "BR") {
+                        out += "\n";
+                    } else {
+                        for (var i = 0; i < node.childNodes.length; i++) {
+                            walk(node.childNodes[i]);
+                        }
+                    }
+                }
+            })(el);
+            return out;
+        }
+        function exitFunction() {
+            // 把编辑内容转成纯文本（<br> 转成换行）后同步到展示区并重新高亮
+            var real = document.getElementById("real-code");
+            var text = editableText(real);
+            var example = document.getElementById("example-code");
+            example.textContent = text;
+            real.textContent = text;   // 同时把编辑区规范为纯文本，避免结构累积
+            hljs.highlightElement(example);
+            syncOptions();   // 退出时把当前选择同步到展示区
+            document.getElementById("code-edit-div").style.display = "none";
+            document.getElementById("code-show-div").style.display = "block";
+        }
+        // 通用运行函数：src 为要编译的代码，cmd 为编译命令，done 为可选的回调。
+        // 运行结果同时写入展示区与编辑区的结果框，切换视图时结果不会丢失。
+        function runCode(src, cmd, done) {
+            var showResult = document.getElementById("show-result");
+            var editResult = document.getElementById("code-result");
+            function setResult(text) {
+                showResult.innerText = text;
+                editResult.innerText = text;
+            }
+            setResult("运行中…");
+            var http = new XMLHttpRequest();
+            // 异步请求，不阻塞页面；不设置 Content-Type，
+            // 让请求保持 CORS "simple request"，避免触发预检 OPTIONS（Coliru 未必支持）
+            http.open("POST", CODE_API, true);
+            http.timeout = 30000;
+            http.onload = function () {
+                if (http.status === 200) {
+                    setResult(http.responseText || "(无输出)");
+                } else {
+                    setResult("请求失败，状态码 " + http.status + "：" + http.responseText);
+                }
+                if (done) { done(); }
+            };
+            http.onerror = function () {
+                setResult("网络错误：无法连接 Coliru（请打开浏览器控制台确认具体原因，常见为 CORS 或证书问题）");
+                if (done) { done(); }
+            };
+            http.ontimeout = function () {
+                setResult("请求超时（30 秒），请重试");
+                if (done) { done(); }
+            };
+            http.send(JSON.stringify({ "cmd": cmd, "src": src }));
+        }
+        function runFunction() {
+            var btn = document.getElementById("code-run");
+            btn.disabled = true;
+            runCode(
+                editableText(document.getElementById("real-code")),
+                buildCmd(),
+                function () { btn.disabled = false; }
+            );
+        }
+        // Ctrl+Enter 快捷运行
+        document.getElementById("real-code").addEventListener("keydown", function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                runFunction();
+            }
+        });
+        onLangChange();
+        hljs.highlightAll();
+        // 打开页面时自动执行一次初始代码，结果展示在“运行结果”区
+        runCode(editableText(document.getElementById("real-code")),
+                buildCmd());
+    </script>
+</div>

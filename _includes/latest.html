@@ -1,0 +1,16 @@
+<div class="left-floating-content">
+    <h2 class="fullpage-list-heading">{{ page.list_title | default: "最近更新文章" }}</h2>
+    <ul class="fullpage-list">
+        {% for post in site.data.recent %}
+        <li>
+            <span class="fullpage-meta">{{ post.modified_date | default: post.date | date: site.date_format }}</span>
+            <a class="fullpage-link" href="{{ post.url | relative_url }}">
+                {{ post.title | escape }}
+            </a>
+            {% if post.excerpt %}
+                {{ post.excerpt }}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
