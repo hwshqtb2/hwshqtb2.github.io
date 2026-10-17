@@ -1,0 +1,62 @@
+# ---------------------------------------------------------------------------
+# Site settings
+# ---------------------------------------------------------------------------
+title: "Jekyll Authors Template"
+description: "A multi-author blog and wiki starter for Jekyll."
+lang: en
+
+# Shown in the footer and in SEO tags. Replace with your own details.
+author: "Your Name"
+email: "you@example.com"
+
+# Footer social links. `title` is also the Font Awesome brand icon name, e.g.
+# github, x-twitter, mastodon, linkedin, youtube, rss.
+social_links:
+  - title: github
+    url: "https://github.com/yourname"
+
+# Footer license line (a page-level `license` front matter value overrides it).
+license: "© Your Name. Licensed under CC BY 4.0."
+
+# Project pages usually need a baseurl, e.g. "/my-repo". Leave it empty for
+# user / organisation pages (https://<name>.github.io).
+# baseurl: ""
+# url: "https://example.com"
+
+# Posts use category based URLs: /<category>/<title>.html
+# Pages keep their path: /authors/alice.html, /guides/setup.html, ...
+permalink: /:categories/:title:output_ext
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# ---------------------------------------------------------------------------
+# Author folders (see _plugins/Authors.rb)
+# ---------------------------------------------------------------------------
+authors:
+  source: authors-src   # every sub-folder of this directory is one author
+  page_dir: authors     # uncategorized author content is mirrored here
+  keep_mirror: false    # true = keep the mirrored files after the build
+
+# Top navigation (paths relative to the site root).
+header_pages:
+  - about.md
+  - guides.md
+  - author.md
+  - blog.md
+
+date_format: "%B %-d, %Y"
+
+# Include the MathJax include in _layouts/default.html.
+mathjax: false
+
+markdown: kramdown
+kramdown:
+  math_engine: null
+
+# Repository files that should not be published.
+exclude:
+  - README.md
+  - LICENSE.txt
+  - docs

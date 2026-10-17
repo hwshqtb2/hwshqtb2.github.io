@@ -1,0 +1,27 @@
+---
+layout: default
+---
+<article class="post">
+
+  {% if page.root %}
+  <div class="page-nav-root">
+    <a href="{{ page.root.url | relative_url }}">☰ Back to category</a>
+  </div>
+  {% endif %}
+
+  {% include fullpage-header.html %}
+
+  {% if page.toc_html %}
+  <div class="autotoc">
+    <h2>{{ page.toc_title | default: "Contents" }}</h2>
+    {{ page.toc_html }}
+  </div>
+  {% endif %}
+
+  <div class="fullpage-content">
+    {{ content }}
+  </div>
+
+</article>
+
+{% include page-nav.html %}

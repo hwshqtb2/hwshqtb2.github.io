@@ -1,0 +1,132 @@
+# Configuration reference
+
+All configuration lives in `_config.yml`. The template only adds the `authors`
+block and a `mathjax` switch on top of standard Jekyll options.
+
+## Site settings
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `title` | `Jekyll Authors Template` | Site title in the header, feed and SEO tags |
+| `description` | | Meta description used by `jekyll-seo-tag` |
+| `lang` | `en` | `<html lang>` value |
+| `author` | `Your Name` | Footer name and SEO author |
+| `email` | `you@example.com` | Footer mail link (optional) |
+| `social_links` | GitHub example | Footer links; `title` is a Font Awesome brand name |
+| `license` | placeholder | Footer license line; a page's `license` front matter wins |
+| `baseurl` | empty | Set for project pages (`/my-repo`) |
+| `url` | empty | Canonical site URL (`https://example.com`) |
+| `permalink` | `/:categories/:title:output_ext` | Post URLs; pages keep their path |
+| `header_pages` | `about.md`, `guides.md`, `author.md`, `blog.md` | Top navigation |
+| `date_format` | `%B %-d, %Y` | Dates in headers and the sidebar |
+| `mathjax` | `false` | Include MathJax on every page |
+| `google_analytics` | unset | Enables the analytics include when set |
+| `exclude` | `README.md`, `LICENSE.txt`, `docs` | Repository files that are not published |
+
+## Author settings
+
+```yaml
+authors:
+  source: authors-src   # one sub-folder per author
+  page_dir: authors     # target for content without a usable category
+  keep_mirror: false    # true = keep the mirrored files after the build
+```
+
+| Key | Purpose |
+| --- | --- |
+| `source` | Directory that contains the author folders, relative to the site root (an absolute path is also accepted). It is excluded from the output automatically. |
+| `page_dir` | Directory used for author content that does not join a category (default `authors`). |
+| `keep_mirror` | Keep the generated files after the build for debugging. Normally everything is cleaned up again. |
+
+The generated mirror manifest is written to
+`.jekyll-cache/authors-mirror.json` (git-ignored). It records a sha256 for every
+file the plugin wrote, so external edits are never overwritten or deleted.
+
+## Plugins
+
+### Authors (`_plugins/Authors.rb`)
+
+Mirrors `authors.source/<author>/` into the site before it is read, applies the
+category rules and removes the mirrored files after the build. Front matter
+`categories` decides the destination; `title` decides the file name. Also
+provides the `{% include_author file.html %}` tag.
+
+### CategoryList (`_plugins/CategoryList.rb`)
+
+Adds a member list to site-root category pages (`<category>.md`). The list
+contains pages under `<category>/` (ordered by `order` when set, by path
+otherwise) and posts whose categories match (newest first), linked by title.
+Disable it per page with `category_list: false`, or place
+`{% category_list %}` / `{% category_list guides %}` manually.
+
+### CategoryOrder (`_plugins/CategoryOrder.rb`)
+
+Orders pages inside one category: it builds the previous/next chain, the
+"Back to category" root link, the "Back to parent" link for nested orders and a
+nested table of contents. Pages join a chapter by declaring a category and an
+`order`; `order: 0` marks the chapter root. Posts keep Jekyll's own date based
+neighbours (the post layout also renders them through `page-nav.html`). The
+rendered page navigation comes from `_includes/page-nav.html`; the table of
+contents from `page.toc_html` in the page/article layouts.
+
+### DefaultLicense (`_plugins/DefaultLicense.rb`)
+
+Lets `layout: article` pages inherit the `license` of their chapter root
+(`order: 0` page of the same category).
+
+### Recent (`_plugins/Recent.rb`)
+
+Collects the five most recently updated posts and `article`/`post` pages
+(`modified_date` or `date`) into `site.data.recent`, rendered by
+`_includes/latest.html`.
+
+### TagsPage (`_plugins/TagsPage.rb`)
+
+Generates one page per tag at `/tags/<tag>.html`, listing every post and page
+that uses the tag.
+
+### MainPart (`_plugins/MainPart.rb`)
+
+Collects pages with a numeric `main_part` front matter value into
+`site.data.main_part_page`, ordered descending. `index.html` uses it for the
+"Sections" list.
+
+### PluginUtils (`_plugins/PluginUtils.rb`)
+
+Shared helper that normalises `categories` and `tags` values, so both
+`[a, b]` and the space separated `a b` form work everywhere.
+
+## Build pipeline
+
+For every build (`jekyll build`, and every rebuild in `jekyll serve`):
+
+1. `:site, :after_reset` — `Authors.mirror` copies author content into place,
+   excludes the author folder from the output and records the manifest.
+2. `read` — Jekyll reads the mirrored pages, posts, layouts and includes.
+3. `:site, :post_read` — every category copy's `page.categories` is narrowed to
+   its own category, so CategoryOrder and DefaultLicense see one copy per
+   category.
+4. `generate` — MainPart, TagsPage, Recent, CategoryOrder and DefaultLicense
+   build their data.
+5. `render` / `write` — pages, posts and static files are written to `_site`.
+6. `at_exit` — mirrored files are deleted again (unless `keep_mirror: true`).
+
+## Deployment
+
+`.github/workflows/jekyll-gh-pages.yml` builds the site with
+`bundle exec jekyll build` and deploys it with `actions/deploy-pages`.
+
+Custom plugins are the core of this template, and the classic GitHub Pages
+builder runs Jekyll in safe mode, which **ignores `_plugins/`**. If you deploy
+elsewhere (Netlify, Cloudflare Pages, your own CI), make sure the build command
+is `bundle exec jekyll build` rather than a safe-mode GitHub Pages build.
+
+## Changing the author folder
+
+1. Rename the folder (e.g. `authors-src` → `content`).
+2. Set `authors.source` in `_config.yml`.
+3. Keep `page_dir` at `authors` unless you also want to rename the fallback tree.
+
+If an old `tmp/` folder is still present while `authors.source` points
+somewhere else, the build warns that `tmp/` would be published as normal site
+content; move or delete it.

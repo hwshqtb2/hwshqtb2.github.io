@@ -1,0 +1,8 @@
+{% if page.tags and page.tags != empty %}
+<div class="tags">
+    {% for tag in page.tags %}
+        {% assign tag_url = '/tags/' | append: tag | append: '.html' %}
+        <a class="tag-item" href="{{ tag_url | relative_url | uri_escape }}">{{ tag }}</a>
+    {% endfor %}
+</div>
+{% endif %}

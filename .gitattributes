@@ -1,0 +1,11 @@
+# Normalise line endings: store and check out text files with LF.
+* text=auto eol=lf
+
+# Binary assets (never convert these)
+*.ico   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.pdf   binary

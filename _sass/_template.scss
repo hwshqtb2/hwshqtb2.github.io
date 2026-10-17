@@ -1,0 +1,67 @@
+@use "minima/settings" as *;
+
+// Components layered on top of the Minima base theme.
+
+.autotoc {
+  margin: $spacing-unit 0;
+  padding: calc($spacing-unit / 2);
+  border-left: 4px solid $brand-color;
+  background-color: $grey-color-light;
+
+  h2 {
+    @include relative-font-size(1.25);
+    margin-bottom: calc($spacing-unit / 4);
+  }
+
+  ul {
+    margin-left: $spacing-unit;
+  }
+}
+
+.page-nav {
+  display: flex;
+  flex-direction: column;
+  gap: calc($spacing-unit / 3);
+  margin: $spacing-unit 0;
+  padding-top: calc($spacing-unit / 2);
+  border-top: 1px solid $grey-color-light;
+}
+
+.page-nav-row {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-unit;
+}
+
+.category-list {
+  margin-left: $spacing-unit;
+
+  li {
+    margin: calc($spacing-unit / 6) 0;
+  }
+}
+
+.tags {
+  margin-top: calc($spacing-unit / 2);
+}
+
+.tag-item {
+  display: inline-block;
+  margin: 0 0.3em 0.3em 0;
+  padding: 0.1em 0.5em;
+  border: 1px solid $brand-color;
+  border-radius: 4px;
+  @include relative-font-size(0.875);
+}
+
+.note {
+  margin: $spacing-unit 0;
+  padding: calc($spacing-unit / 2);
+  border-left: 4px solid $brand-color;
+  background-color: $grey-color-light;
+
+  strong {
+    display: block;
+    margin-bottom: calc($spacing-unit / 6);
+  }
+}

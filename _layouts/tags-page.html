@@ -1,0 +1,11 @@
+---
+layout: page
+---
+
+<article>
+    <ul class="article-list">
+        {% for post in page.tagged %}
+            <li><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></li>
+        {% endfor %}
+    </ul>
+</article>
