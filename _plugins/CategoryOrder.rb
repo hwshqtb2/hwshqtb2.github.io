@@ -60,13 +60,13 @@ module Jekyll
         end
 
         # order: 0 root page: list every chapter member.
-        toc.data['toc_html'] = self.class.toc_html_of(chain) if toc
+        toc.data['toc_html'] = self.class.toc_html_of(site, chain) if toc
 
         # Any prefix document: list the descendants it contains.
         chain.each do |doc|
           seg = self.class.segments(doc.data['order'])
           descendants = chain.select { |m| self.class.proper_prefix?(seg, self.class.segments(m.data['order'])) }
-          doc.data['toc_html'] = self.class.toc_html_of(descendants) unless descendants.empty?
+          doc.data['toc_html'] = self.class.toc_html_of(site, descendants) unless descendants.empty?
         end
       end
     end
@@ -77,18 +77,27 @@ module Jekyll
       Jekyll::PluginUtils.order_segments(order)
     end
 
-    def self.toc_html_of(docs)
+    def self.toc_html_of(site, docs)
       items = docs.map do |doc|
         seg = segments(doc.data['order'])
         {
           :seg     => seg,
           :display => seg.join('.'),
           :title   => CGI.escapeHTML(doc.data['title'].to_s),
-          :url     => CGI.escapeHTML(doc.url)
+          :url     => CGI.escapeHTML(absolute_url(site, doc))
         }
       end
       items.sort_by! { |i| i[:seg] }
       render_list(build_tree(items))
+    end
+
+    # Jekyll's page URLs do not include baseurl; add it for project pages.
+    def self.absolute_url(site, doc)
+      url = doc.url.to_s
+      base = site.respond_to?(:baseurl) ? site.baseurl.to_s : ""
+      return url if base.empty? || url.start_with?(base)
+
+      "#{base}#{url}"
     end
 
     # Build a nested tree from sorted items (a parent segment is a prefix of its

@@ -3,6 +3,10 @@
 # The custom plugins in _plugins/ are the core of this template, so the build
 # uses `bundle exec jekyll build` instead of the GitHub Pages builder (which
 # runs Jekyll in safe mode and would ignore _plugins/).
+#
+# Pages must be enabled for the repository once:
+# Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
+# See the "Deployment" section in README.md.
 name: Build and deploy Jekyll site to GitHub Pages
 
 on:
@@ -26,6 +30,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Fails with a "Get Pages site failed" error when Pages is not enabled
+      # or its source is not "GitHub Actions". Enable it once in the
+      # repository settings before running the workflow.
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -34,13 +45,12 @@ jobs:
       - name: Install dependencies
         run: bundle install
 
+      # --baseurl uses the Pages base path: "" for <user>.github.io and
+      # "/<repo>" for project pages, so links work in both cases.
       - name: Build with Jekyll
-        run: bundle exec jekyll build --destination ./_site
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

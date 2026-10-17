@@ -124,10 +124,32 @@ builds the site with `bundle exec jekyll build` and deploys `_site` to Pages.
 That is required because the template relies on custom plugins: the classic
 GitHub Pages builder runs Jekyll in safe mode and ignores `_plugins/`.
 
-1. Push the repository to GitHub.
+1. Push the repository to GitHub (branch `main`).
 2. Open **Settings → Pages** and set **Build and deployment → Source** to
-   **GitHub Actions**.
-3. For project pages (`<user>.github.io/<repo>`) set `baseurl` in `_config.yml`.
+   **GitHub Actions**. This has to be done once; without it the workflow stops
+   at the *Setup Pages* step with `Get Pages site failed ... Not Found`.
+3. Run the workflow again (Actions → the failed run → **Re-run all jobs**), or
+   push another commit.
+
+> If the log contains `actions/jekyll-build-pages@v1`, `github-pages v232`,
+> `jekyll v3.10.0` or `Unknown tag 'include_author'`, the Source is still
+> **Deploy from a branch**: that builder runs Jekyll in safe mode and cannot run
+> `_plugins/`. Switch the Source to **GitHub Actions** as described above.
+
+Notes:
+
+- The workflow passes the Pages base path to Jekyll
+  (`--baseurl "${{ steps.pages.outputs.base_path }}"`), so both user pages
+  (`<user>.github.io`) and project pages (`<user>.github.io/<repo>`) work
+  without editing `_config.yml`.
+- Private repositories need a GitHub plan that supports Pages; otherwise the
+  Pages API returns 404 even after enabling it.
+- `enablement: true` on `actions/configure-pages` is *not* used: according to
+  its documentation it requires a personal access token or GitHub App token
+  with repository administration rights, not the default `GITHUB_TOKEN`. Enabling
+  Pages in the settings once is simpler and works for forks too.
+- If you prefer absolute URLs for the feed/SEO tags, set `url` in `_config.yml`
+  to the final site origin (`https://<user>.github.io`).
 
 ## Customization
 
@@ -151,6 +173,8 @@ GitHub Pages builder runs Jekyll in safe mode and ignores `_plugins/`.
 
 | Symptom | Fix |
 | --- | --- |
+| The Pages run shows `actions/jekyll-build-pages@v1`, `github-pages v232` or `Unknown tag 'include_author'` | GitHub Pages is building from a branch in safe mode, so `_plugins/` is skipped. Set **Settings → Pages → Source** to **GitHub Actions** and re-run the workflow. |
+| `Get Pages site failed ... Not Found` at Setup Pages | Pages is not enabled yet (or the repository plan does not support Pages): enable it under **Settings → Pages → Source: GitHub Actions**. |
 | `Category page missing ...` | Create `<category>.md` at the site root, or fix the spelling in `categories:`. |
 | A page landed in `/authors/<author>/...` | Its category page does not exist, or its category value is invalid. |
 | `include_author` cannot find a file | The author folder must be an ASCII slug and the file must live in `<author>/_includes/`. |

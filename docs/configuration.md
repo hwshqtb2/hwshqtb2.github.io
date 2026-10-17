@@ -116,6 +116,26 @@ For every build (`jekyll build`, and every rebuild in `jekyll serve`):
 `.github/workflows/jekyll-gh-pages.yml` builds the site with
 `bundle exec jekyll build` and deploys it with `actions/deploy-pages`.
 
+Pages must be enabled once for the repository:
+
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Re-run the workflow.
+
+Without that setting `actions/configure-pages` fails with
+`Get Pages site failed ... Not Found`, because the Pages API returns 404 until
+the site is enabled. Private repositories also need a plan that supports Pages.
+
+If the Pages run shows `actions/jekyll-build-pages@v1`, `github-pages v232`,
+`jekyll v3.10.0` or `Unknown tag 'include_author'`, the Source is still
+**Deploy from a branch**: that builder runs Jekyll in safe mode, ignores
+`_plugins/` and publishes the author folders raw. Select **GitHub Actions**
+instead.
+
+The workflow runs `bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"`
+so user pages (`<user>.github.io`, base path `""`) and project pages
+(`<user>.github.io/<repo>`, base path `/<repo>`) both work without editing
+`_config.yml`. Set `url` in `_config.yml` if you need absolute canonical URLs.
+
 Custom plugins are the core of this template, and the classic GitHub Pages
 builder runs Jekyll in safe mode, which **ignores `_plugins/`**. If you deploy
 elsewhere (Netlify, Cloudflare Pages, your own CI), make sure the build command
